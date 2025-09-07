@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Folkadmindash.css';
+import { useNavigate } from 'react-router-dom';
 
 const BedAssignmentModal = ({ showModal, selectedUser, beds, onClose, onAssign }) => {
   if (!showModal || !selectedUser) return null;
@@ -50,6 +51,15 @@ const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState(0)
+  const nav = useNavigate();
+
+  useEffect(() => {
+    const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
+    if (isLoggedIn !== 'true') {
+      nav("/");
+    }
+
+  }, [nav]);
 
   const getApproved = async () => {
     await fetch('https://hkgk-temple-server.onrender.com/approved-users')
