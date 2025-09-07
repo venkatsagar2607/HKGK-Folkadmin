@@ -31,7 +31,7 @@ const App = () => {
 
     return (
         <div className="login-container">
-            <h2>Admin Login</h2>
+            <h2>Folk Admin Login</h2>
             <form onSubmit={handleLogin}>
                 <input
                     type="text"

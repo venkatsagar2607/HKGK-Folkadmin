@@ -49,9 +49,10 @@ const App = () => {
   const [beds, setBeds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState(0)
 
   const getApproved = async () => {
-    await fetch('http://localhost:3001/approved-users')
+    await fetch('https://hkgk-temple-server.onrender.com/approved-users')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -66,7 +67,7 @@ const App = () => {
   }
 
   const getBeds = async () => {
-    await fetch('http://localhost:3001/get-beds')
+    await fetch('https://hkgk-temple-server.onrender.com/get-beds')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -97,12 +98,12 @@ const App = () => {
     console.log(selectedUser)
     if (!selectedUser)
       return;
-    const response = await fetch('http://localhost:3001/assign-bed', {
+    const response = await fetch('https://hkgk-temple-server.onrender.com/assign-bed', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ bedId: bedId, userId: selectedUser.id }),
+      body: JSON.stringify({ bedId: bedId, userId: selectedUser._id }),
     });
 
     const data = await response.json();
@@ -115,7 +116,7 @@ const App = () => {
   };
 
   const removeUser = async (userId, bedId) => {
-    const response = await fetch('http://localhost:3001/remove-user', {
+    const response = await fetch('https://hkgk-temple-server.onrender.com/remove-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -131,10 +132,36 @@ const App = () => {
     }
   }
 
+  const getRecords = async () => {
+    setUsers((prevUsers) => {
+      if (!phoneNumber || phoneNumber === 0) {
+        return prevUsers;
+      }
+      return prevUsers.filter(user => String(user.phoneNumber).includes(String(phoneNumber)));
+    })
+  }
+
   return (
     <div className="admin-dashboard-container">
       <div className="main-card">
         <h1 className="title">Folk Admin - Bed Assignment</h1>
+        <div className="search-container">
+          <input
+            type="number"
+            placeholder="Search by phone number..."
+            value={phoneNumber === 0 ? '' : phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              fontSize: '16px',
+              width: '40%',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+            }}
+          />
+          <button type="button" onClick={getRecords} className="submit-btn">Submit</button>
+
+        </div>
 
         {/* Table for larger screens */}
         <div className="table-container">
@@ -143,6 +170,7 @@ const App = () => {
               <tr>
                 <th>User Name</th>
                 <th>Folk Guide</th>
+                <th>Phone Number</th>
                 <th>Status</th>
                 <th>Assigned Bed No.</th>
                 <th>Action</th>
@@ -150,9 +178,10 @@ const App = () => {
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user.id}>
+                <tr key={user._id}>
                   <td>{user.name}</td>
                   <td className="text-gray-500">{user.folkGuidName}</td>
+                  <td>{user.phoneNumber}</td>
                   <td>
                     <span className={`status-badge ${user.status === 'approved' ? 'status-approved' : 'status-assigned'}`}>
                       {user.status}
@@ -169,7 +198,7 @@ const App = () => {
                       <button
                         className="de-button"
                         onClick={() => {
-                          removeUser(user.id, user.assigned_bed)
+                          removeUser(user._id, user.assigned_bed)
                         }}
                       >
                         Exit&nbsp;User
@@ -186,22 +215,33 @@ const App = () => {
         {/* Mobile cards for small screens */}
         <div className="mobile-card-container">
           {users.map(user => (
-            <div key={user.id} className="user-card">
+            <div key={user._id} className="user-card">
               <div className="card-header">
                 <h3>{user.name}</h3>
                 <span className={`status-badge ${user.status === 'approved' ? 'status-approved' : 'status-assigned'}`}>
                   {user.status}
                 </span>
               </div>
-              <p>Request: {user.folkGuidName}</p>
-              <p className="assigned-bed">Assigned Bed No.: {user.assignedBedId || 'N/A'}</p>
-              <button
-                onClick={() => handleAssignClick(user)}
-                disabled={user.status !== 'approved'}
-                className="assign-button full-width-button"
-              >
-                Assign Bed
-              </button>
+              <p>Folk Guide: {user.folkGuidName}</p>
+              <p>Mobile: {user.phoneNumber}</p>
+              <p className="assigned-bed">Assigned Bed No.: {user.assigned_bed || 'N/A'}</p>
+              {user.assigned_bed == null ?
+                <button
+                  onClick={() => handleAssignClick(user)}
+                  disabled={user.status !== 'approved'}
+                  className="assign-button full-width-button"
+                >
+                  Assign Bed
+                </button> :
+                <button
+                  className="de-button full-width-button"
+                  onClick={() => {
+                    removeUser(user._id, user.assigned_bed)
+                  }}
+                >
+                  Exit&nbsp;User
+
+                </button>}
             </div>
           ))}
         </div>
@@ -219,5 +259,6 @@ const App = () => {
     </div>
   );
 };
+
 
 export default App;
