@@ -181,6 +181,7 @@ const App = () => {
                 <th>User Name</th>
                 <th>Folk Guide</th>
                 <th>Phone Number</th>
+                <th>Email</th>
                 <th>Status</th>
                 <th>Assigned Bed No.</th>
                 <th>Action</th>
@@ -192,6 +193,7 @@ const App = () => {
                   <td>{user.name}</td>
                   <td className="text-gray-500">{user.folkGuidName}</td>
                   <td>{user.phoneNumber}</td>
+                  <td>{user.email}</td>
                   <td>
                     <span className={`status-badge ${user.status === 'approved' ? 'status-approved' : 'status-assigned'}`}>
                       {user.status}
