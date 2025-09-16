@@ -182,6 +182,9 @@ const App = () => {
                 <th>Folk Guide</th>
                 <th>Phone Number</th>
                 <th>Email</th>
+                <th>Dates</th>
+                <th>CheckinTime</th>
+                <th>CheckoutTime</th>
                 <th>Status</th>
                 <th>Assigned Bed No.</th>
                 <th>Action</th>
@@ -194,6 +197,9 @@ const App = () => {
                   <td className="text-gray-500">{user.folkGuidName}</td>
                   <td>{user.phoneNumber}</td>
                   <td>{user.email}</td>
+                  <td>{user.fromDate} to {user.toDate}</td>
+                  <td>{user.checkinTime}</td>
+                  <td>{user.checkoutTime}</td>
                   <td>
                     <span className={`status-badge ${user.status === 'approved' ? 'status-approved' : 'status-assigned'}`}>
                       {user.status}
@@ -236,6 +242,9 @@ const App = () => {
               </div>
               <p>Folk Guide: {user.folkGuidName}</p>
               <p>Mobile: {user.phoneNumber}</p>
+              <p>Dates: {user.fromDate} to {user.toDate}</p>
+              <p>CheckinTime:{user.checkinTime}</p>
+              <p>CheckoutTime:{user.checkoutTime}</p>
               <p className="assigned-bed">Assigned Bed No.: {user.assigned_bed || 'N/A'}</p>
               {user.assigned_bed == null ?
                 <button
