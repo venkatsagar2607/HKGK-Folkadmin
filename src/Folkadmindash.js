@@ -197,7 +197,7 @@ const App = () => {
                   <td className="text-gray-500">{user.folkGuidName}</td>
                   <td>{user.phoneNumber}</td>
                   <td>{user.email}</td>
-                  <td>{user.fromDate} to {user.toDate}</td>
+                  <td>{new Date(user.fromDate).toDateString()} to {new Date(user.toDate).toDateString()}</td>
                   <td>{user.checkinTime}</td>
                   <td>{user.checkoutTime}</td>
                   <td>
@@ -242,7 +242,7 @@ const App = () => {
               </div>
               <p>Folk Guide: {user.folkGuidName}</p>
               <p>Mobile: {user.phoneNumber}</p>
-              <p>Dates: {user.fromDate} to {user.toDate}</p>
+              <p>Dates:  {new Date(user.fromDate).toDateString()} to {new Date(user.toDate).toDateString()}</p>
               <p>CheckinTime:{user.checkinTime}</p>
               <p>CheckoutTime:{user.checkoutTime}</p>
               <p className="assigned-bed">Assigned Bed No.: {user.assigned_bed || 'N/A'}</p>
