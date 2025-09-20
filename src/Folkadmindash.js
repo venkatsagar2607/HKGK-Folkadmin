@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './Folkadmindash.css';
 import { useNavigate } from 'react-router-dom';
+import { FaEdit } from 'react-icons/fa';
 
 const BedAssignmentModal = ({ showModal, selectedUser, beds, onClose, onAssign }) => {
   if (!showModal || !selectedUser) return null;
 
-  // const availableBeds = beds.filter(bed => bed.status === 'available');
-
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h3>Assign Bed to {selectedUser.name}</h3>
+        <h3>{selectedUser.assigned_bed ? "Edit Bed Assignment" : "Assign Bed"} for {selectedUser.name}</h3>
         <p>Select an available bed:</p>
         {beds.length > 0 ? (
           <ul className="modal-list">
@@ -18,12 +17,12 @@ const BedAssignmentModal = ({ showModal, selectedUser, beds, onClose, onAssign }
               <li key={bed.bedId}>
                 <span>Bed No: {bed.bedId}</span>
                 {
-                  bed.status === 'available' ?
+                  bed.status === 'available' || bed.bedId === selectedUser.assigned_bed ?
                     <button
                       onClick={() => onAssign(bed.bedId)}
                       className="modal-assign-button"
                     >
-                      Assign
+                      {bed.bedId === selectedUser.assigned_bed ? "Reassign" : "Assign"}
                     </button> :
                     <p>Allocated</p>
                 }
@@ -44,13 +43,12 @@ const BedAssignmentModal = ({ showModal, selectedUser, beds, onClose, onAssign }
   );
 };
 
-
 const App = () => {
   const [users, setUsers] = useState([]);
   const [beds, setBeds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [phoneNumber, setPhoneNumber] = useState(0)
+  const [phoneNumber, setPhoneNumber] = useState(0);
   const nav = useNavigate();
 
   useEffect(() => {
@@ -58,45 +56,38 @@ const App = () => {
     if (isLoggedIn !== 'true') {
       nav("/");
     }
-
   }, [nav]);
 
   const getApproved = async () => {
-    await fetch('https://hkgk-temple-server.onrender.com/approved-users')
+    await fetch('http://localhost:3001/approved-users')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setUsers(data.users);
-          console.log(data.users)
         }
       })
       .catch(() => {
-        // Fallback or handle error, optionally load mock data
         alert("Server Problem");
       });
-  }
+  };
 
   const getBeds = async () => {
-    await fetch('https://hkgk-temple-server.onrender.com/get-beds')
+    await fetch('http://localhost:3001/get-beds')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setBeds(data.beds);
-          console.log(data.beds)
         }
       })
       .catch(() => {
-        // Fallback or handle error, optionally load mock data
         alert("Server Problem");
       });
-  }
+  };
 
   // Fetch approved users and beds on mount
   useEffect(() => {
-    // Fetch approved users from backend
     getApproved();
     getBeds();
-
   }, []);
 
   const handleAssignClick = (user) => {
@@ -105,42 +96,37 @@ const App = () => {
   };
 
   const handleBedAssignment = async (bedId) => {
-    console.log(selectedUser)
-    if (!selectedUser)
-      return;
-    const response = await fetch('https://hkgk-temple-server.onrender.com/assign-bed', {
+    if (!selectedUser) return;
+    const response = await fetch('http://localhost:3001/assign-bed', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bedId: bedId, userId: selectedUser._id }),
     });
 
     const data = await response.json();
+    console.log(data)
     if (data.success) {
+      console.log("Hello World")
       getApproved();
       getBeds();
       setShowModal(false);
-
     }
+    console.log("5678765")
   };
 
   const removeUser = async (userId, bedId) => {
-    const response = await fetch('https://hkgk-temple-server.onrender.com/remove-user', {
+    const response = await fetch('http://localhost:3001/remove-user', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bedId: bedId, userId: userId }),
     });
 
     const data = await response.json();
-    console.log(response);
     if (data.success) {
       getApproved();
       getBeds();
     }
-  }
+  };
 
   const getRecords = async () => {
     setUsers((prevUsers) => {
@@ -148,13 +134,14 @@ const App = () => {
         return prevUsers;
       }
       return prevUsers.filter(user => String(user.phoneNumber).includes(String(phoneNumber)));
-    })
-  }
+    });
+  };
 
   return (
     <div className="admin-dashboard-container">
       <div className="main-card">
         <h1 className="title">Folk Admin - Bed Assignment</h1>
+
         <div className="search-container">
           <input
             type="number"
@@ -170,7 +157,6 @@ const App = () => {
             }}
           />
           <button type="button" onClick={getRecords} className="submit-btn">Submit</button>
-
         </div>
 
         {/* Table for larger screens */}
@@ -205,24 +191,31 @@ const App = () => {
                       {user.status}
                     </span>
                   </td>
-                  <td>{user.assigned_bed || 'N/A'}</td>
                   <td>
-                    {user.assigned_bed == null ? <button
-                      onClick={() => handleAssignClick(user)}
-                      className="assign-button"
-                    >
-                      Assign Bed
-                    </button> :
+                    {user.assigned_bed || 'N/A'}{" "}
+                    {user.assigned_bed &&
+                      <FaEdit
+                        onClick={() => handleAssignClick(user)}
+                        style={{ cursor: 'pointer', marginLeft: '8px', color: '#007bff' }}
+                        title="Edit Bed"
+                      />}
+                  </td>
+                  <td>
+                    {user.assigned_bed == null ? (
+                      <button
+                        onClick={() => handleAssignClick(user)}
+                        className="assign-button"
+                      >
+                        Assign Bed
+                      </button>
+                    ) : (
                       <button
                         className="de-button"
-                        onClick={() => {
-                          removeUser(user._id, user.assigned_bed)
-                        }}
+                        onClick={() => removeUser(user._id, user.assigned_bed)}
                       >
                         Exit&nbsp;User
-
                       </button>
-                    }
+                    )}
                   </td>
                 </tr>
               ))}
@@ -242,31 +235,39 @@ const App = () => {
               </div>
               <p>Folk Guide: {user.folkGuidName}</p>
               <p>Mobile: {user.phoneNumber}</p>
-              <p>Dates:  {new Date(user.fromDate).toDateString()} to {new Date(user.toDate).toDateString()}</p>
-              <p>CheckinTime:{user.checkinTime}</p>
-              <p>CheckoutTime:{user.checkoutTime}</p>
-              <p className="assigned-bed">Assigned Bed No.: {user.assigned_bed || 'N/A'}</p>
-              {user.assigned_bed == null ?
+              <p>Dates: {new Date(user.fromDate).toDateString()} to {new Date(user.toDate).toDateString()}</p>
+              <p>CheckinTime: {user.checkinTime}</p>
+              <p>CheckoutTime: {user.checkoutTime}</p>
+              <p className="assigned-bed">
+                Assigned Bed No.: {user.assigned_bed || 'N/A'}{" "}
+                {user.assigned_bed &&
+                  <FaEdit
+                    onClick={() => handleAssignClick(user)}
+                    style={{ cursor: 'pointer', marginLeft: '6px', color: '#007bff' }}
+                    title="Edit Bed"
+                  />}
+              </p>
+              {user.assigned_bed == null ? (
                 <button
                   onClick={() => handleAssignClick(user)}
                   disabled={user.status !== 'approved'}
                   className="assign-button full-width-button"
                 >
                   Assign Bed
-                </button> :
+                </button>
+              ) : (
                 <button
                   className="de-button full-width-button"
-                  onClick={() => {
-                    removeUser(user._id, user.assigned_bed)
-                  }}
+                  onClick={() => removeUser(user._id, user.assigned_bed)}
                 >
                   Exit&nbsp;User
-
-                </button>}
+                </button>
+              )}
             </div>
           ))}
         </div>
       </div>
+
       <BedAssignmentModal
         showModal={showModal}
         selectedUser={selectedUser}
@@ -280,6 +281,5 @@ const App = () => {
     </div>
   );
 };
-
 
 export default App;
