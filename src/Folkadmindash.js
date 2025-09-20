@@ -59,7 +59,7 @@ const App = () => {
   }, [nav]);
 
   const getApproved = async () => {
-    await fetch('http://localhost:3001/approved-users')
+    await fetch('https://hkgk-temple-server.onrender.com/approved-users')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -72,7 +72,7 @@ const App = () => {
   };
 
   const getBeds = async () => {
-    await fetch('http://localhost:3001/get-beds')
+    await fetch('https://hkgk-temple-server.onrender.com/get-beds')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -97,7 +97,7 @@ const App = () => {
 
   const handleBedAssignment = async (bedId) => {
     if (!selectedUser) return;
-    const response = await fetch('http://localhost:3001/assign-bed', {
+    const response = await fetch('https://hkgk-temple-server.onrender.com/assign-bed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bedId: bedId, userId: selectedUser._id }),
@@ -115,7 +115,7 @@ const App = () => {
   };
 
   const removeUser = async (userId, bedId) => {
-    const response = await fetch('http://localhost:3001/remove-user', {
+    const response = await fetch('https://hkgk-temple-server.onrender.com/remove-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bedId: bedId, userId: userId }),
